@@ -32,7 +32,7 @@ COPY ./pkg ./pkg
 COPY ./proto ./proto
 COPY ./bin ./bin
 COPY ./deploy ./deploy
-ADD ./bin/ssh-socks5.sh /apps/target/
+ADD ./bin/*.sh /apps/target/
 
 COPY ./cache.local ./cache.local
 

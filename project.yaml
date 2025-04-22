@@ -34,7 +34,7 @@ supervisor_openvpn: |
     ;username=user         # (default is no username)
     ;password=123          # (default is no password)
 
-    [program:openvpn]
+    [program:openvpn-client]
     user=root
     # --auth-user-pass configs/openvpn.ovpn.auth (account\npassword)
     command=openvpn --auth-nocache --config configs/openvpn.ovpn --askpass configs/openvpn.ovpn.pass
@@ -42,6 +42,13 @@ supervisor_openvpn: |
     autorestart=true
     stdout_logfile=logs/openvpn-client.log
     stderr_logfile=logs/openvpn-client.error
+
+    [program:openvpn-postup]
+    user=root
+    command=iptables -A INPUT -i tun0 -m conntrack --ctstate NEW -j DROP
+    autostart=true
+    autorestart=false
+    startsecs=0
 
     [program:socks5_server]
     command=target/main server --addr=:1090
