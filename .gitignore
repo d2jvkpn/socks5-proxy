@@ -31,7 +31,6 @@ target/
 configs/
 data/
 logs/
-site/
 docker-compose.yaml
 docker-compose.yml
 compose.yaml
