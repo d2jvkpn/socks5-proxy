@@ -1,5 +1,6 @@
 #!/bin/bash
-set -eu -o pipefail; _wd=$(pwd); _path=$(dirname $0)
+set -eu -o pipefail; _wd=$(pwd); _dir=$(readlink -f `dirname "$0"`)
+
 
 command -v docker > /dev/null
 command -v git > /dev/null
@@ -65,7 +66,7 @@ fi
 
 #### 3. pull image
 [[ "$DOCKER_Pull" != "false" ]] && \
-for base in $(awk '/^FROM/{print $2}' ${_path}/Dockerfile); do
+for base in $(awk '/^FROM/{print $2}' ${_dir}/Dockerfile); do
     echo ">>> Pull image: $base"
     docker pull $base
 
@@ -102,7 +103,7 @@ GO_ldflags="\
 #???  -X main.git_repository=$git_repository -X main.image=$image"
 #???  -X main.build_host=$build_host
 
-DOCKER_BUILDKIT=1 docker build --no-cache --file ${_path}/Containerfile \
+DOCKER_BUILDKIT=1 docker build --no-cache --file ${_dir}/Containerfile \
   --build-arg=APP_Name="$app_name" \
   --build-arg=APP_Version="$app_version" \
   --build-arg=region="$region" \

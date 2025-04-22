@@ -1,6 +1,6 @@
 #!/bin/bash
-set -eu -o pipefail # -x
-_wd=$(pwd); _path=$(dirname $0 | xargs -i readlink -f {})
+set -eu -o pipefail; _wd=$(pwd); _dir=$(readlink -f `dirname "$0"`)
+
 
 command -v yq > /dev/null
 
@@ -12,7 +12,7 @@ export APP_Name=$(yq .app_name project.yaml) \
   USER_GID=$(id -g)
 
 mkdir -p configs logs data/postgres data/redis # data/$APP_Name
-envsubst < ${_path}/compose.socks5-ssh.yaml > compose.yaml
+envsubst < ${_wd}/compose.socks5-ssh.yaml > compose.yaml
 
 ####
 exit 0
