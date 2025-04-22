@@ -38,17 +38,20 @@ COPY ./cache.local ./cache.local
 
 RUN chmod a+x /apps/target/*.sh
 
-RUN if [ -d ./cache.local/vendor ]; then \
-    echo "==> Found cache.local/vendor"; \
-    mv ./cache.local/vendor vendor; \
-  fi
+#RUN if [ -d ./cache.local/vendor ]; then \
+#    echo "==> Found cache.local/vendor"; \
+#    mv ./cache.local/vendor vendor; \
+#  fi
 
 # in alpine, date doesn't parse %:z
 # mkdir -p target && go build -o target/main -ldflags="-w -s ${GO_ldflags}" main.go
 RUN mkdir -p target
 
 # note: -trimpath will remove -ldflags
-RUN go build -ldflags="-w -s ${GO_ldflags}" -o target/main main.go
+#RUN go build -ldflags="-w -s ${GO_ldflags}" -o target/main main.go
+RUN --mount=type=bind,target=vendor,source=vendor \
+  go build -ldflags="-w -s ${GO_ldflags}" -o target/main main.go
+
 ADD ./cache.local/build.yaml /apps/target/
 
 ####
@@ -80,9 +83,9 @@ RUN apk --no-cache update && \
   apk --no-cache upgrade && \
   apk --no-cache add \
     tzdata coreutils bash python3 openssl vim openssh curl bind-tools \
-    iproute2 stunnel traceroute iptables \
+    iproute2 stunnel traceroute iptables nmap \
     supervisor socat openvpn wireguard-tools dante-server
-    # alternatives: gcompat nmap expect ansible sshpass
+    # alternatives: gcompat expect ansible sshpass
 
 RUN mkdir -p /apps/target
 WORKDIR /apps
