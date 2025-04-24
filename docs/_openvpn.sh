@@ -3,6 +3,7 @@ set -eu -o pipefail; _wd=$(pwd); _dir=$(readlink -f `dirname "$0"`)
 
 
 exit
+####
 docker exec -it socks5-vpn supervisorctl status
 # supervisorctl reread
 # supervisorctl update
@@ -16,3 +17,14 @@ curl -x sock5h://127.0.0.1:1090 https://icanhazip.com
 # docker exec -it socks5-vpn bash
 
 # docker exec -it socks5-vpn ssh -F configs/ssh.conf remote_host
+
+
+exit 0
+####
+iptables -A INPUT -i tun0 -m conntrack --ctstate NEW -j DROP
+
+iptables -L -n -v
+
+iptables -D INPUT -i tun0 -m conntrack --ctstate NEW -j DROP
+
+iptables -A INPUT -i tun0 -s 10.1.1.1 -m conntrack --ctstate ESTABLISHED,RELATED -j ACCEPT
