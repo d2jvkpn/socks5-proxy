@@ -28,3 +28,13 @@ iptables -L -n -v
 iptables -D INPUT -i tun0 -m conntrack --ctstate NEW -j DROP
 
 iptables -A INPUT -i tun0 -s 10.1.1.1 -m conntrack --ctstate ESTABLISHED,RELATED -j ACCEPT
+
+
+exit
+####
+interface=${interafce:-tun0}
+
+addr=$(ip addr show dev "$interface" | awk '$1=="inet"{print $2}')
+echo "==> addr: $addr"
+
+nmap -sn $addr
