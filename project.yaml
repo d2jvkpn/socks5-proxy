@@ -1,5 +1,5 @@
 app_name: socks5-proxy
-app_version: 1.0.2
+app_version: 1.1.0
 authors: ["d2jvkpn <d2jvkpn@noreply.local>"]
 repository: git@github.com:d2jvkpn/socks5-proxy.git
 image_name: socks5-proxy
@@ -26,133 +26,143 @@ socks5_ssh: |
     ssh_known_hosts: /home/account/.ssh/known_hosts
 
 supervisor_openvpn: |
-    # path: /apps/configs/supervisor.ini
+  # path: /apps/configs/supervisor.ini
 
-    # to enable inet_http_server, copy and edit the following lines to /apps/configs/supervisor.ini
-    ;[inet_http_server]    # inet (TCP) server disabled by default
-    ;port=:1098            # (ip_address:port specifier, *:port for all iface)
-    ;username=user         # (default is no username)
-    ;password=123          # (default is no password)
+  # to enable inet_http_server, copy and edit the following lines to /apps/configs/supervisor.ini
+  ;[inet_http_server]    # inet (TCP) server disabled by default
+  ;port=:1098            # (ip_address:port specifier, *:port for all iface)
+  ;username=user         # (default is no username)
+  ;password=123          # (default is no password)
 
-    [program:openvpn-client]
-    user=root
-    # --auth-user-pass configs/openvpn.ovpn.auth (account\npassword)
-    command=target/openvpn.sh --auth-nocache --config configs/openvpn.ovpn --askpass configs/openvpn.ovpn.pass
-    autostart=true
-    autorestart=true
-    stdout_logfile=logs/openvpn-client.log
-    stderr_logfile=logs/openvpn-client.error
+  [program:openvpn-client]
+  user=root
+  # --auth-user-pass configs/openvpn.ovpn.auth (account\npassword)
+  command=target/openvpn.sh --auth-nocache --config configs/openvpn.ovpn --askpass configs/openvpn.ovpn.pass
+  autostart=true
+  autorestart=true
+  stdout_logfile=logs/openvpn-client.log
+  stderr_logfile=logs/openvpn-client.error
 
-    ;[program:openvpn-postup]
-    ;user=root
-    ;command=iptables -A INPUT -i tun0 -m conntrack --ctstate NEW -j DROP
-    ;autostart=true
-    ;autorestart=false
-    ;startsecs=0
+  ;[program:openvpn-postup]
+  ;user=root
+  ;command=iptables -A INPUT -i tun0 -m conntrack --ctstate NEW -j DROP
+  ;autostart=true
+  ;autorestart=false
+  ;startsecs=0
 
-    [program:socks5_server]
-    directory=/apps
-    #environment=KEY1="value1",KEY2="value2"
-    command=target/main server --addr=:1090
-    autostart=true
-    autorestart=true
-    stdout_logfile=logs/socks5_server.log
-    stderr_logfile=logs/socks5_server.error
+  [program:socks5_server]
+  directory=/apps
+  #environment=KEY1="value1",KEY2="value2"
+  command=target/main server --addr=:1090
+  autostart=true
+  autorestart=true
+  stdout_logfile=logs/socks5_server.log
+  stderr_logfile=logs/socks5_server.error
 
-    [program:socat_tcp-8000]
-    command=socat TCP-LISTEN:8000,fork TCP:192.168.255.1:8000
-    autostart=true
-    autorestart=true
-    stdout_logfile=logs/socat_tcp-8000.log
-    stderr_logfile=logs/socat_tcp-8000.error
+  [program:socat_tcp-8000]
+  command=socat TCP-LISTEN:8000,fork TCP:192.168.255.1:8000
+  autostart=true
+  autorestart=true
+  stdout_logfile=logs/socat_tcp-8000.log
+  stderr_logfile=logs/socat_tcp-8000.error
 
-    [program:ssh-socks5]
-    environment=config=configs/ssh.conf
-    command=ssh-socks5.sh remote_host :1080
-    autostart=true
-    autorestart=true
-    stdout_logfile=logs/ssh-socks5.log
-    stderr_logfile=logs/ssh-socks5.error
+  [program:ssh-socks5]
+  environment=config=configs/ssh.conf
+  command=ssh-socks5.sh remote_host :1080
+  autostart=true
+  autorestart=true
+  stdout_logfile=logs/ssh-socks5.log
+  stderr_logfile=logs/ssh-socks5.error
 
-    [program:file_server] # python3 -m http.server --directory data/site 1099
-    command=target/main file_server --addr=:1099 --mount=./data/site:/site --mount=./logs:/logs
-    autostart=true
-    autorestart=true
-    stdout_logfile=logs/file_server.log
-    stderr_logfile=logs/file_server.error
+  [program:file_server] # python3 -m http.server --directory data/site 1099
+  command=target/main file_server --addr=:1099 --mount=./data/site:/site --mount=./logs:/logs
+  autostart=true
+  autorestart=true
+  stdout_logfile=logs/file_server.log
+  stderr_logfile=logs/file_server.error
 
-    [program:dante-server]
-    command=sockd -f configs/dante-server.conf -N 2
-    autostart=true
-    autorestart=true
-    stdout_logfile=logs/date-server.log
-    stderr_logfile=logs/date-server.error
+  [program:dante-server]
+  command=sockd -f configs/dante-server.conf -N 2
+  autostart=true
+  autorestart=true
+  stdout_logfile=logs/date-server.log
+  stderr_logfile=logs/date-server.error
 
 
 supervisor_ssh: |
-    # path: /apps/configs/supervisor.ini
+  # path: /apps/configs/supervisor.ini
 
-    [program:socks5_ssh]
-    command=target/main, ssh, -config=configs/prod.yaml, -addr=127.0.0.1:1080
-    autostart=true
-    autorestart=true
-    stdout_logfile=logs/socks5_ssh.log
-    stderr_logfile=logs/socks5_ssh.error
+  [program:socks5_ssh]
+  command=target/main, ssh, -config=configs/prod.yaml, -addr=127.0.0.1:1080
+  autostart=true
+  autorestart=true
+  stdout_logfile=logs/socks5_ssh.log
+  stderr_logfile=logs/socks5_ssh.error
 
-    [program:file_server]
-    command=target/main file_server --addr=:1089
-    autostart=true
-    autorestart=true
-    stdout_logfile=logs/file_server.log
-    stderr_logfile=logs/file_server.error
+  [program:file_server]
+  command=target/main file_server --addr=:1089
+  autostart=true
+  autorestart=true
+  stdout_logfile=logs/file_server.log
+  stderr_logfile=logs/file_server.error
 
 ssh_config: |
-    # path: configs/ssh.conf
+  # path: configs/ssh.conf
 
-    Host remote_host
-        #ProxyJump host01,host02
-        #ProxyCommand  nc -X 5 -x 127.0.0.1:1090 %h
-        HostName 127.0.0.1
-        User     account
-        Port     22
-        IdentityFile       configs/account.ssh-ed25519 # ~/.ssh/id_rsa
-        UserKnownHostsFile configs/ssh-known_hosts     # ~/.ssh/known_hosts
+  Host remote_host
+    #ProxyJump host01,host02
+    #ProxyCommand  nc -X 5 -x 127.0.0.1:1090 %h
+    HostName 127.0.0.1
+    User     account
+    Port     22
+    IdentityFile       configs/account.ssh-ed25519 # ~/.ssh/id_rsa
+    UserKnownHostsFile configs/ssh-known_hosts     # ~/.ssh/known_hosts
 
-        LogLevel              INFO
-        Compression           yes
-        TCPKeepAlive          yes
-        ServerAliveInterval   5
-        ServerAliveCountMax   3
-        ConnectTimeout        10
-        ExitOnForwardFailure  yes
+    LogLevel              INFO
+    Compression           yes
+    TCPKeepAlive          yes
+    ServerAliveInterval   5
+    ServerAliveCountMax   3
+    ConnectTimeout        10
+    ExitOnForwardFailure  yes
 
-        #RemoteCommand cd /path/to/project && bash
-        #RemoteCommand HISTFILE='' bash --login
-        #RequestTTY    yes
+    ControlMaster auto
+    ControlPath ~/.ssh/cm-%r@%h:%p
+    ControlPersist 600
+
+    #RemoteCommand cd /path/to/project && bash
+    #RemoteCommand HISTFILE='' bash --login
+    #RequestTTY    yes
+
+
+sshd_config: |
+  # path: /etc/ssh/sshd_config, /etc/ssh/sshd_config.d/custom.conf
+  MaxSessions 100
+  MaxStartups 50:30:200
 
 dante-server: |
-    # path: /etc/danted.conf, /apps/configs/dante-server.conf
+  # path: /etc/danted.conf, /apps/configs/dante-server.conf
 
-    logoutput: /var/log/dante-server.log # syslog stdout stderr
-    user.privileged: root
-    user.unprivileged: nobody
+  logoutput: /var/log/dante-server.log # syslog stdout stderr
+  user.privileged: root
+  user.unprivileged: nobody
 
-    internal: eth0 port = 1080
-    external: tun0 # wg0
+  internal: eth0 port = 1080
+  external: tun0 # wg0
 
-    clientmethod: none
-    socksmethod: none
+  clientmethod: none
+  socksmethod: none
 
-    client pass {
-      #from: 0.0.0.0/0 to: 0.0.0.0/0 # ipv4
-      #from: ::/0 to: ::/0           # ipv6
-      from: 0/0 to: 0/0
-      log: connect disconnect error
-    }
+  client pass {
+    #from: 0.0.0.0/0 to: 0.0.0.0/0 # ipv4
+    #from: ::/0 to: ::/0           # ipv6
+    from: 0/0 to: 0/0
+    log: connect disconnect error
+  }
 
-    socks pass {
-      #from: 0.0.0.0/0 to: 0.0.0.0/0 # ipv4
-      #from: ::/0 to: ::/0           # ipv6
-      from: 0/0 to: 0/0
-      log: connect disconnect error
-    }
+  socks pass {
+    #from: 0.0.0.0/0 to: 0.0.0.0/0 # ipv4
+    #from: ::/0 to: ::/0           # ipv6
+    from: 0/0 to: 0/0
+    log: connect disconnect error
+  }
